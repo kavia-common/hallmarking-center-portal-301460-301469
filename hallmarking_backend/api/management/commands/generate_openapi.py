@@ -1,36 +1,57 @@
 import json
 import os
+import django
 
 from django.core.management.base import BaseCommand
-from django.test import RequestFactory
 from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework.permissions import AllowAny
+from drf_yasg.generators import OpenAPISchemaGenerator
 
 class Command(BaseCommand):
+    help = 'Generate OpenAPI schema for the API'
+    
     def handle(self, *args, **options):
-        factory = RequestFactory()
-        django_request = factory.get('/api/?format=openapi')
-
-        schema_view = get_schema_view(
-            openapi.Info(
-                title="My API",
+        # Ensure Django is set up
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+        django.setup()
+        
+        # Create schema generator
+        generator = OpenAPISchemaGenerator(
+            info=openapi.Info(
+                title='Hallmarking Center API',
                 default_version='v1',
-                description="Test description",
+                description="""
+API for Hallmarking Center Portal
+
+This API provides endpoints for:
+- User registration and authentication
+- Hallmarking center information
+- Services portfolio
+- Certifications management
+
+## Authentication
+The API uses session-based authentication. Users must register and login to access protected endpoints.
+
+## CORS
+The API is configured to accept requests from the frontend at http://localhost:3000
+                """,
+                contact=openapi.Contact(email="admin@hallmarkingcenter.com"),
             ),
-            public=True,
-            permission_classes=(AllowAny,),
+            version='v1',
+            url='http://localhost:3001',
         )
-
-        # Call the view with the raw Django HttpRequest
-        response = schema_view.without_ui(cache_timeout=0)(django_request)
-        response.render()
-
-        openapi_schema = json.loads(response.content.decode())
-
+        
+        # Get the schema
+        schema = generator.get_schema(None, True)
+        
+        # Convert to dictionary
+        schema_dict = schema.as_odict()
+        
         output_dir = "interfaces"
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, "openapi.json")
 
         with open(output_path, "w") as f:
-            json.dump(openapi_schema, f, indent=2)
+            json.dump(schema_dict, f, indent=2)
+        
+        self.stdout.write(self.style.SUCCESS(f'Successfully generated OpenAPI schema at {output_path}'))
+        self.stdout.write(self.style.SUCCESS(f'Total endpoints: {len(schema_dict.get("paths", {}))}'))

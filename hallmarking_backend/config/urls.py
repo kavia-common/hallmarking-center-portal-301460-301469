@@ -28,9 +28,24 @@ urlpatterns = [
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="My API",
+      title="Hallmarking Center API",
       default_version='v1',
-      description="Test description",
+      description="""
+API for Hallmarking Center Portal
+
+This API provides endpoints for:
+- User registration and authentication
+- Hallmarking center information
+- Services portfolio
+- Certifications management
+
+## Authentication
+The API uses session-based authentication. Users must register and login to access protected endpoints.
+
+## CORS
+The API is configured to accept requests from the frontend at http://localhost:3000
+      """,
+      contact=openapi.Contact(email="admin@hallmarkingcenter.com"),
    ),
    public=True,
    permission_classes=(permissions.AllowAny,),
@@ -51,9 +66,24 @@ def dynamic_schema_view(request, *args, **kwargs):
     url = get_full_url(request)
     view = get_schema_view(
         openapi.Info(
-            title="My API",
+            title="Hallmarking Center API",
             default_version='v1',
-            description="API Docs",
+            description="""
+API for Hallmarking Center Portal
+
+This API provides endpoints for:
+- User registration and authentication
+- Hallmarking center information
+- Services portfolio
+- Certifications management
+
+## Authentication
+The API uses session-based authentication. Users must register and login to access protected endpoints.
+
+## CORS
+The API is configured to accept requests from the frontend at http://localhost:3000
+            """,
+            contact=openapi.Contact(email="admin@hallmarkingcenter.com"),
         ),
         public=True,
         url=url,
