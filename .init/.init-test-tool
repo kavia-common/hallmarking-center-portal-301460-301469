@@ -1,0 +1,4 @@
+{
+    "command": "python manage.py test",
+    "working_directory": "/home/kavia/workspace/code-generation/hallmarking-center-portal-301460-301469/hallmarking_backend"
+}
